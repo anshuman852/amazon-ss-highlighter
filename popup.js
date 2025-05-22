@@ -3,19 +3,20 @@ const colorOptions = document.getElementById('colorOptions');
 const swatches = colorOptions.querySelectorAll('.color-swatch');
 const nonSSMode = document.getElementById('nonSSMode');
 const sponsoredMode = document.getElementById('sponsoredMode');
+const quickToggle = document.getElementById('quickToggle');
 
-// Basic color palette
-const COLORS = [
-  "#32cd32", // Green
-  "#ff9800", // Orange
-  "#2196f3", // Blue
-  "#e91e63", // Pink
-  "#ffd600", // Yellow
-  "#222"     // Black
-];
+function setQuickToggleState(enabled) {
+  if (enabled) {
+    quickToggle.textContent = "Disable Extension";
+    quickToggle.classList.remove('off');
+  } else {
+    quickToggle.textContent = "Enable Extension";
+    quickToggle.classList.add('off');
+  }
+}
 
-// Load saved settings, default to "dim"
-chrome.storage.sync.get(['highlightColor', 'nonSSMode', 'sponsoredMode'], (result) => {
+// Load saved settings, default to "dim" and enabled
+chrome.storage.sync.get(['highlightColor', 'nonSSMode', 'sponsoredMode', 'extensionEnabled'], (result) => {
   let color = result.highlightColor || "#32cd32";
   colorValue.textContent = color;
   swatches.forEach(swatch => {
@@ -27,6 +28,7 @@ chrome.storage.sync.get(['highlightColor', 'nonSSMode', 'sponsoredMode'], (resul
   });
   nonSSMode.value = result.nonSSMode || "dim";
   sponsoredMode.value = result.sponsoredMode || "dim";
+  setQuickToggleState(result.extensionEnabled !== false);
 });
 
 // Color swatch click handler
@@ -60,6 +62,21 @@ sponsoredMode.addEventListener('change', () => {
       if (tabs[0]) {
         chrome.tabs.sendMessage(tabs[0].id, { type: "setSponsoredMode", mode: value });
       }
+    });
+  });
+});
+
+// Quick toggle handler
+quickToggle.addEventListener('click', () => {
+  chrome.storage.sync.get(['extensionEnabled'], (result) => {
+    const enabled = !(result.extensionEnabled === false);
+    chrome.storage.sync.set({ extensionEnabled: !enabled }, () => {
+      setQuickToggleState(!enabled);
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        if (tabs[0]) {
+          chrome.tabs.sendMessage(tabs[0].id, { type: "toggleEnabled", enabled: !enabled });
+        }
+      });
     });
   });
 });

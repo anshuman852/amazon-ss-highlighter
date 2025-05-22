@@ -13,6 +13,9 @@
       "48": "icon48.png"
     }
   },
+  "background": {
+    "service_worker": "background.js"
+  },
   "content_scripts": [
     {
       "matches": ["https://www.amazon.in/s*"],

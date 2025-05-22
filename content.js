@@ -8,11 +8,12 @@ const SS_COUNT_ID = "amazon-ss-count-banner";
 
 // Get highlight color, nonSSMode, and sponsoredMode from storage, fallback to default
 function getSettings(callback) {
-  chrome.storage.sync.get(['highlightColor', 'nonSSMode', 'sponsoredMode'], (result) => {
+  chrome.storage.sync.get(['highlightColor', 'nonSSMode', 'sponsoredMode', 'extensionEnabled'], (result) => {
     callback({
       color: result.highlightColor || "#32cd32",
-      nonSSMode: result.nonSSMode || "show",
-      sponsoredMode: result.sponsoredMode || "show"
+      nonSSMode: result.nonSSMode || "dim",
+      sponsoredMode: result.sponsoredMode || "dim",
+      enabled: result.extensionEnabled !== false
     });
   });
 }
@@ -69,7 +70,17 @@ function removeSponsoredWatermark(tile) {
 }
 
 // Highlight, dim, or hide a product tile based on settings
-function processTile(tile, color, nonSSMode, isSSPresent, sponsoredMode) {
+function processTile(tile, color, nonSSMode, isSSPresent, sponsoredMode, enabled) {
+  if (!enabled) {
+    tile.classList.remove(HIGHLIGHT_CLASS, NONSS_DIM_CLASS, SPONSORED_DIM_CLASS);
+    removeSponsoredWatermark(tile);
+    tile.style.border = "";
+    tile.style.boxShadow = "";
+    tile.style.display = "";
+    tile.style.pointerEvents = "";
+    return;
+  }
+
   const isSpon = isSponsored(tile);
 
   // Sponsored logic
@@ -127,7 +138,7 @@ function processTile(tile, color, nonSSMode, isSSPresent, sponsoredMode) {
   }
 }
 
-// Scan and process all products
+// Scan and process all products, send badge count
 function scanAndProcess(settings) {
   const tiles = document.querySelectorAll('[data-asin][data-component-type="s-search-result"]');
   let ssCount = 0;
@@ -136,7 +147,8 @@ function scanAndProcess(settings) {
   });
   updateCountBanner(ssCount);
   const isSSPresent = ssCount > 0;
-  tiles.forEach(tile => processTile(tile, settings.color, settings.nonSSMode, isSSPresent, settings.sponsoredMode));
+  tiles.forEach(tile => processTile(tile, settings.color, settings.nonSSMode, isSSPresent, settings.sponsoredMode, settings.enabled));
+  chrome.runtime.sendMessage({ type: "setBadge", count: ssCount });
 }
 
 // Observe for dynamically loaded products (infinite scroll)
@@ -144,10 +156,15 @@ const observer = new MutationObserver(() => {
   getSettings(scanAndProcess);
 });
 
-// Listen for popup mode changes
+// Listen for popup mode changes and quick toggle
 chrome.runtime.onMessage.addListener((msg) => {
   if (msg.type === "setNonSSMode" || msg.type === "setSponsoredMode") {
     getSettings(scanAndProcess);
+  }
+  if (msg.type === "toggleEnabled") {
+    chrome.storage.sync.set({ extensionEnabled: msg.enabled }, () => {
+      getSettings(scanAndProcess);
+    });
   }
 });
 
