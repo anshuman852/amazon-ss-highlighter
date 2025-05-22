@@ -4,7 +4,6 @@ const HIGHLIGHT_CLASS = "amazon-ss-highlight";
 const NONSS_DIM_CLASS = "amazon-ss-dim";
 const SPONSORED_DIM_CLASS = "amazon-ss-sponsored-dim";
 const SPONSORED_WATERMARK_CLASS = "amazon-ss-sponsored-watermark";
-const SS_COUNT_ID = "amazon-ss-count-banner";
 
 // Get highlight color, nonSSMode, and sponsoredMode from storage, fallback to default
 function getSettings(callback) {
@@ -32,25 +31,6 @@ function isSponsored(tile) {
       el.textContent.trim().toLowerCase() === "sponsored"
     )
   );
-}
-
-// Insert or update the count banner
-function updateCountBanner(count) {
-  let banner = document.getElementById(SS_COUNT_ID);
-  if (!banner) {
-    const resultsBar = document.querySelector('[cel_widget_id="UPPER-RESULT_INFO_BAR-0"], .sg-col-14-of-20 .sg-col-inner');
-    banner = document.createElement("div");
-    banner.id = SS_COUNT_ID;
-    banner.style.cssText = "margin:10px 0 10px 0;padding:8px 14px;background:#fffbe6;border-left:4px solid #32cd32;font-size:15px;font-weight:500;color:#222;border-radius:6px;display:inline-block;";
-    if (resultsBar && resultsBar.parentNode) {
-      resultsBar.parentNode.insertBefore(banner, resultsBar.nextSibling);
-    } else {
-      document.body.insertBefore(banner, document.body.firstChild);
-    }
-  }
-  banner.textContent = count === 0
-    ? "Found 0 Subscribe & Save products on this page."
-    : `Found ${count} Subscribe & Save product${count > 1 ? "s" : ""} on this page.`;
 }
 
 // Add sponsored watermark if needed
@@ -138,6 +118,49 @@ function processTile(tile, color, nonSSMode, isSSPresent, sponsoredMode, enabled
   }
 }
 
+// Highlight the returns policy card based on its type
+function highlightReturnsPolicyCard(color) {
+  const badKeywords = ["non-returnable", "final sale"];
+  const goodKeywords = ["return & exchange", "return and exchange", "returnable"];
+  
+  // Try different selectors for the returns policy
+  const selectors = [
+    '[data-name="RETURNS_POLICY"].icon-container',
+    '#RETURNS_POLICY',
+    '.a-link-normal:contains("Non-Returnable")',
+    '.a-link-normal:contains("Return")'
+  ];
+  
+  for (const selector of selectors) {
+    try {
+      const elements = document.querySelectorAll(selector);
+      
+      if (elements.length > 0) {
+        for (const el of elements) {
+          const text = el.innerText.toLowerCase();
+          
+          // Highlight non-returnable/final sale in red
+          if (badKeywords.some(k => text.includes(k))) {
+            el.style.setProperty('border', '3px solid #e53935', 'important');
+            el.style.setProperty('border-radius', '12px', 'important');
+            el.style.setProperty('background', '#fff0f0', 'important');
+            el.style.setProperty('box-shadow', '0 0 8px 2px #e5393555', 'important');
+          }
+          // Highlight return & exchange in green
+          else if (goodKeywords.some(k => text.includes(k))) {
+            el.style.setProperty('border', '3px solid #32cd32', 'important');
+            el.style.setProperty('border-radius', '12px', 'important');
+            el.style.setProperty('background', '#f0fff0', 'important');
+            el.style.setProperty('box-shadow', `0 0 8px 2px ${color}55`, 'important');
+          }
+        }
+      }
+    } catch (e) {
+      // Silently continue to next selector
+    }
+  }
+}
+
 // Scan and process all products, send badge count
 function scanAndProcess(settings) {
   const tiles = document.querySelectorAll('[data-asin][data-component-type="s-search-result"]');
@@ -145,10 +168,14 @@ function scanAndProcess(settings) {
   tiles.forEach(tile => {
     if (containsSubscribeSave(tile)) ssCount++;
   });
-  updateCountBanner(ssCount);
   const isSSPresent = ssCount > 0;
   tiles.forEach(tile => processTile(tile, settings.color, settings.nonSSMode, isSSPresent, settings.sponsoredMode, settings.enabled));
   chrome.runtime.sendMessage({ type: "setBadge", count: ssCount });
+
+  // Highlight returns policy card on product page
+  if (location.pathname.includes('/dp/') || location.pathname.includes('/gp/')) {
+    highlightReturnsPolicyCard(settings.color);
+  }
 }
 
 // Observe for dynamically loaded products (infinite scroll)
@@ -170,7 +197,7 @@ chrome.runtime.onMessage.addListener((msg) => {
 
 // Start observing the main search results container
 function observeResults() {
-  const results = document.querySelector("#search");
+  const results = document.querySelector("#search") || document.body;
   if (results) {
     observer.observe(results, { childList: true, subtree: true });
   }
@@ -179,3 +206,8 @@ function observeResults() {
 // Initial run
 getSettings(scanAndProcess);
 observeResults();
+
+// Run again after a delay to catch dynamically loaded elements
+setTimeout(() => {
+  getSettings(scanAndProcess);
+}, 1500);
