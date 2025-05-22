@@ -7,12 +7,12 @@ A Chrome extension that visually highlights and optionally filters products elig
 ## Features
 
 - Highlights eligible products with a customizable color.
-- Option to hide, dim (grey overlay), or show non-eligible products.
-- Sponsored items can be hidden, dimmed (with a "Sponsored" watermark), or shown normally.
+- Option to hide, dim (grey overlay), or show non-eligible products (default: Dim).
+- Sponsored items can be hidden, dimmed (with a "Sponsored" watermark), or shown normally (default: Dim).
 - If no Subscribe & Save products are found, all products are shown normally and a message is displayed near the results bar.
 - Works with infinite scroll and dynamically loaded results.
 - No configuration required—runs automatically.
-- Simple popup UI for settings.
+- Simple popup UI and options page for settings.
 
 ## How to Load the Extension from ZIP
 
@@ -28,7 +28,7 @@ The extension icon will appear in your Chrome toolbar.
 
 - Visit any [Amazon India search page](https://www.amazon.in/s).
 - Eligible products will be highlighted.
-- Click the extension icon to change highlight color, hide/dim non-eligible products, or control how sponsored items appear.
+- Click the extension icon or open the options page to change highlight color, hide/dim non-eligible products, or control how sponsored items appear.
 
 ## Development
 
