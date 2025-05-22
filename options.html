@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Highlight Color Options</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    label { font-weight: bold; }
+    input[type="color"] { margin-left: 10px; }
+  </style>
+</head>
+<body>
+  <label for="highlightColor">Highlight Color:</label>
+  <input type="color" id="highlightColor" value="#32cd32">
+  <span id="colorValue">#32cd32</span>
+  <script>
+    const colorInput = document.getElementById('highlightColor');
+    const colorValue = document.getElementById('colorValue');
+    // Load saved color
+    chrome.storage.sync.get(['highlightColor'], (result) => {
+      if (result.highlightColor) {
+        colorInput.value = result.highlightColor;
+        colorValue.textContent = result.highlightColor;
+      }
+    });
+    // Save color on change
+    colorInput.addEventListener('input', () => {
+      const color = colorInput.value;
+      colorValue.textContent = color;
+      chrome.storage.sync.set({ highlightColor: color });
+    });
+  </script>
+</body>
+</html>

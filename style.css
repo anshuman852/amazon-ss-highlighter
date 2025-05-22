@@ -1,0 +1,7 @@
+/* Highlight style for Subscribe & Save eligible products */
+.amazon-ss-highlight {
+  border: 2px solid #32cd32 !important;
+  box-shadow: 0 0 10px 2px #32cd3255 !important;
+  border-radius: 10px !important;
+  transition: box-shadow 0.2s;
+}

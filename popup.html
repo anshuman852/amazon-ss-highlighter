@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Amazon Subscribe & Save Highlighter</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f6f8fa;
+      min-width: 260px;
+      min-height: 210px;
+      color: #222;
+    }
+    .header {
+      background: #32cd32;
+      color: #fff;
+      padding: 16px 12px 10px 12px;
+      border-radius: 0 0 12px 12px;
+      text-align: center;
+    }
+    .header img {
+      width: 32px;
+      height: 32px;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+    .section {
+      padding: 16px 16px 0 16px;
+    }
+    .color-row, .toggle-row {
+      margin-top: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .info {
+      margin-top: 18px;
+      font-size: 13px;
+      color: #555;
+      background: #eafbe7;
+      border-left: 4px solid #32cd32;
+      padding: 8px 10px;
+      border-radius: 6px;
+    }
+    .footer {
+      margin: 18px 0 0 0;
+      text-align: center;
+      font-size: 12px;
+      color: #aaa;
+    }
+    #colorValue {
+      font-family: monospace;
+      font-size: 13px;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 2px 6px;
+    }
+    input[type="color"] {
+      border: none;
+      background: none;
+      width: 32px;
+      height: 32px;
+      cursor: pointer;
+    }
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 40px;
+      height: 22px;
+    }
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #ccc;
+      transition: .2s;
+      border-radius: 22px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 2px;
+      bottom: 2px;
+      background-color: white;
+      transition: .2s;
+      border-radius: 50%;
+    }
+    input:checked + .slider {
+      background-color: #32cd32;
+    }
+    input:checked + .slider:before {
+      transform: translateX(18px);
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <img src="icon48.png" alt="icon">
+    <span>Amazon S&S Highlighter</span>
+  </div>
+  <div class="section">
+    <div class="color-row">
+      <label for="highlightColor">Highlight Color:</label>
+      <input type="color" id="highlightColor" value="#32cd32">
+      <span id="colorValue">#32cd32</span>
+    </div>
+    <div class="toggle-row">
+      <label for="hideNonSS">Hide non S&S products:</label>
+      <label class="toggle-switch">
+        <input type="checkbox" id="hideNonSS">
+        <span class="slider"></span>
+      </label>
+    </div>
+    <div class="info">
+      Products eligible for <b>Subscribe & Save</b> or <b>auto-delivery</b> are highlighted on Amazon India search results.<br>
+      You can change the highlight color or hide non-eligible products here. Changes apply instantly.
+    </div>
+  </div>
+  <div class="footer">
+    &copy; 2025 Amazon S&S Highlighter &mdash; <a href="https://www.amazon.in/s" target="_blank" style="color:#32cd32;text-decoration:none;">Test Now</a>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>

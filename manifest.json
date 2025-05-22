@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "Amazon Subscribe & Save Highlighter",
+  "version": "1.0",
+  "description": "Highlights products on Amazon India search result pages that are eligible for Subscribe & Save (auto-delivery).",
+  "icons": {
+    "48": "icon48.png"
+  },
+  "options_page": "options.html",
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "48": "icon48.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.amazon.in/s*"],
+      "js": ["content.js"],
+      "css": ["style.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "permissions": ["storage"]
+}
