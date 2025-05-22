@@ -1,23 +1,43 @@
-const colorInput = document.getElementById('highlightColor');
 const colorValue = document.getElementById('colorValue');
 const hideNonSS = document.getElementById('hideNonSS');
+const colorOptions = document.getElementById('colorOptions');
+const swatches = colorOptions.querySelectorAll('.color-swatch');
+
+// Basic color palette
+const COLORS = [
+  "#32cd32", // Green
+  "#ff9800", // Orange
+  "#2196f3", // Blue
+  "#e91e63", // Pink
+  "#ffd600", // Yellow
+  "#222"     // Black
+];
 
 // Load saved settings
 chrome.storage.sync.get(['highlightColor', 'hideNonSS'], (result) => {
-  if (result.highlightColor) {
-    colorInput.value = result.highlightColor;
-    colorValue.textContent = result.highlightColor;
-  }
+  let color = result.highlightColor || "#32cd32";
+  colorValue.textContent = color;
+  swatches.forEach(swatch => {
+    if (swatch.dataset.color === color) {
+      swatch.classList.add('selected');
+    } else {
+      swatch.classList.remove('selected');
+    }
+  });
   if (typeof result.hideNonSS === "boolean") {
     hideNonSS.checked = result.hideNonSS;
   }
 });
 
-// Save color on change
-colorInput.addEventListener('input', () => {
-  const color = colorInput.value;
-  colorValue.textContent = color;
-  chrome.storage.sync.set({ highlightColor: color });
+// Color swatch click handler
+swatches.forEach(swatch => {
+  swatch.addEventListener('click', () => {
+    const color = swatch.dataset.color;
+    chrome.storage.sync.set({ highlightColor: color });
+    colorValue.textContent = color;
+    swatches.forEach(s => s.classList.remove('selected'));
+    swatch.classList.add('selected');
+  });
 });
 
 // Save toggle on change and notify content script

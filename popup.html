@@ -35,6 +35,26 @@
       align-items: center;
       gap: 10px;
     }
+    .color-options {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .color-swatch {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 2px solid #eee;
+      cursor: pointer;
+      box-shadow: 0 1px 3px #0001;
+      transition: border 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .color-swatch.selected {
+      border: 3px solid #32cd32;
+    }
     .info {
       margin-top: 18px;
       font-size: 13px;
@@ -57,13 +77,7 @@
       border: 1px solid #ddd;
       border-radius: 4px;
       padding: 2px 6px;
-    }
-    input[type="color"] {
-      border: none;
-      background: none;
-      width: 32px;
-      height: 32px;
-      cursor: pointer;
+      margin-left: 8px;
     }
     .toggle-switch {
       position: relative;
@@ -110,8 +124,15 @@
   </div>
   <div class="section">
     <div class="color-row">
-      <label for="highlightColor">Highlight Color:</label>
-      <input type="color" id="highlightColor" value="#32cd32">
+      <label>Highlight Color:</label>
+      <div class="color-options" id="colorOptions">
+        <div class="color-swatch" data-color="#32cd32" style="background:#32cd32;" title="Green"></div>
+        <div class="color-swatch" data-color="#ff9800" style="background:#ff9800;" title="Orange"></div>
+        <div class="color-swatch" data-color="#2196f3" style="background:#2196f3;" title="Blue"></div>
+        <div class="color-swatch" data-color="#e91e63" style="background:#e91e63;" title="Pink"></div>
+        <div class="color-swatch" data-color="#ffd600" style="background:#ffd600;" title="Yellow"></div>
+        <div class="color-swatch" data-color="#222" style="background:#222;" title="Black"></div>
+      </div>
       <span id="colorValue">#32cd32</span>
     </div>
     <div class="toggle-row">
