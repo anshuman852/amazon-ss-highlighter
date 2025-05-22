@@ -12,12 +12,15 @@ A Chrome extension that visually highlights and optionally filters products elig
 - No configuration required—runs automatically.
 - Simple popup UI for settings.
 
-## Installation
+## How to Load the Extension from ZIP
 
-1. Clone or download this repository.
-2. Go to `chrome://extensions/` in Chrome.
-3. Enable "Developer mode".
-4. Click "Load unpacked" and select the extension folder.
+1. **Extract** the ZIP file to a folder on your computer.
+2. Open Chrome and go to [`chrome://extensions/`](chrome://extensions/).
+3. Enable **Developer mode** (toggle at the top right).
+4. Click **Load unpacked**.
+5. Select the folder where you extracted the ZIP.
+
+The extension icon will appear in your Chrome toolbar.
 
 ## Usage
 
