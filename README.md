@@ -2,12 +2,14 @@
 
 A Chrome extension that visually highlights and optionally filters products eligible for "Subscribe & Save" or "auto-delivery" on Amazon India search result pages.
 
-[![Download as ZIP](https://img.shields.io/badge/Download%20ZIP-Click%20here-brightgreen?logo=github)](https://github.com/anshuman852/amazon-ss-highlighter/archive/refs/heads/main.zip)
+[![Download as ZIP](https://img.shields.io/badge/Download%20ZIP-Click%20here-brightgreen?logo=github)](https://github.com/your-username/amazon-ss-highlighter/archive/refs/heads/main.zip)
 
 ## Features
 
 - Highlights eligible products with a customizable color.
-- Option to hide non-eligible products.
+- Option to hide, dim (grey overlay), or show non-eligible products.
+- Sponsored items can be hidden, dimmed (with a "Sponsored" watermark), or shown normally.
+- If no Subscribe & Save products are found, all products are shown normally and a message is displayed near the results bar.
 - Works with infinite scroll and dynamically loaded results.
 - No configuration required—runs automatically.
 - Simple popup UI for settings.
@@ -26,7 +28,7 @@ The extension icon will appear in your Chrome toolbar.
 
 - Visit any [Amazon India search page](https://www.amazon.in/s).
 - Eligible products will be highlighted.
-- Click the extension icon to change highlight color or hide non-eligible products.
+- Click the extension icon to change highlight color, hide/dim non-eligible products, or control how sponsored items appear.
 
 ## Development
 

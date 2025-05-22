@@ -4,16 +4,6 @@ const swatches = colorOptions.querySelectorAll('.color-swatch');
 const nonSSMode = document.getElementById('nonSSMode');
 const sponsoredMode = document.getElementById('sponsoredMode');
 
-// Basic color palette
-const COLORS = [
-  "#32cd32", // Green
-  "#ff9800", // Orange
-  "#2196f3", // Blue
-  "#e91e63", // Pink
-  "#ffd600", // Yellow
-  "#222"     // Black
-];
-
 // Load saved settings, default to "dim"
 chrome.storage.sync.get(['highlightColor', 'nonSSMode', 'sponsoredMode'], (result) => {
   let color = result.highlightColor || "#32cd32";
@@ -40,26 +30,14 @@ swatches.forEach(swatch => {
   });
 });
 
-// Save nonSSMode on change and notify content script
+// Save nonSSMode on change
 nonSSMode.addEventListener('change', () => {
   const value = nonSSMode.value;
-  chrome.storage.sync.set({ nonSSMode: value }, () => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      if (tabs[0]) {
-        chrome.tabs.sendMessage(tabs[0].id, { type: "setNonSSMode", mode: value });
-      }
-    });
-  });
+  chrome.storage.sync.set({ nonSSMode: value });
 });
 
-// Save sponsoredMode on change and notify content script
+// Save sponsoredMode on change
 sponsoredMode.addEventListener('change', () => {
   const value = sponsoredMode.value;
-  chrome.storage.sync.set({ sponsoredMode: value }, () => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      if (tabs[0]) {
-        chrome.tabs.sendMessage(tabs[0].id, { type: "setSponsoredMode", mode: value });
-      }
-    });
-  });
+  chrome.storage.sync.set({ sponsoredMode: value });
 });

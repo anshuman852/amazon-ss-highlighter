@@ -1,13 +1,18 @@
 // content.js
 const KEYWORDS = ["subscribe & save", "auto-delivery"];
 const HIGHLIGHT_CLASS = "amazon-ss-highlight";
+const NONSS_DIM_CLASS = "amazon-ss-dim";
+const SPONSORED_DIM_CLASS = "amazon-ss-sponsored-dim";
+const SPONSORED_WATERMARK_CLASS = "amazon-ss-sponsored-watermark";
+const SS_COUNT_ID = "amazon-ss-count-banner";
 
-// Get highlight color and hide toggle from storage, fallback to default
+// Get highlight color, nonSSMode, and sponsoredMode from storage, fallback to default
 function getSettings(callback) {
-  chrome.storage.sync.get(['highlightColor', 'hideNonSS'], (result) => {
+  chrome.storage.sync.get(['highlightColor', 'nonSSMode', 'sponsoredMode'], (result) => {
     callback({
       color: result.highlightColor || "#32cd32",
-      hide: !!result.hideNonSS
+      nonSSMode: result.nonSSMode || "show",
+      sponsoredMode: result.sponsoredMode || "show"
     });
   });
 }
@@ -19,28 +24,119 @@ function containsSubscribeSave(node) {
   return KEYWORDS.some(keyword => text.includes(keyword));
 }
 
-// Highlight or hide a product tile based on settings
-function processTile(tile, color, hide) {
+// Utility: Check if a tile is sponsored
+function isSponsored(tile) {
+  return !!tile.querySelector('span, div') && (
+    Array.from(tile.querySelectorAll('span, div')).some(el =>
+      el.textContent.trim().toLowerCase() === "sponsored"
+    )
+  );
+}
+
+// Insert or update the count banner
+function updateCountBanner(count) {
+  let banner = document.getElementById(SS_COUNT_ID);
+  if (!banner) {
+    const resultsBar = document.querySelector('[cel_widget_id="UPPER-RESULT_INFO_BAR-0"], .sg-col-14-of-20 .sg-col-inner');
+    banner = document.createElement("div");
+    banner.id = SS_COUNT_ID;
+    banner.style.cssText = "margin:10px 0 10px 0;padding:8px 14px;background:#fffbe6;border-left:4px solid #32cd32;font-size:15px;font-weight:500;color:#222;border-radius:6px;display:inline-block;";
+    if (resultsBar && resultsBar.parentNode) {
+      resultsBar.parentNode.insertBefore(banner, resultsBar.nextSibling);
+    } else {
+      document.body.insertBefore(banner, document.body.firstChild);
+    }
+  }
+  banner.textContent = count === 0
+    ? "Found 0 Subscribe & Save products on this page."
+    : `Found ${count} Subscribe & Save product${count > 1 ? "s" : ""} on this page.`;
+}
+
+// Add sponsored watermark if needed
+function addSponsoredWatermark(tile) {
+  if (!tile.querySelector('.' + SPONSORED_WATERMARK_CLASS)) {
+    const mark = document.createElement('div');
+    mark.className = SPONSORED_WATERMARK_CLASS;
+    mark.textContent = "Sponsored";
+    mark.style.cssText = "position:absolute;top:8px;right:8px;background:rgba(255,255,255,0.85);color:#e91e63;font-weight:bold;font-size:12px;padding:2px 8px;border-radius:6px;z-index:10;pointer-events:none;box-shadow:0 1px 4px #0002;";
+    tile.style.position = "relative";
+    tile.appendChild(mark);
+  }
+}
+function removeSponsoredWatermark(tile) {
+  const mark = tile.querySelector('.' + SPONSORED_WATERMARK_CLASS);
+  if (mark) mark.remove();
+}
+
+// Highlight, dim, or hide a product tile based on settings
+function processTile(tile, color, nonSSMode, isSSPresent, sponsoredMode) {
+  const isSpon = isSponsored(tile);
+
+  // Sponsored logic
+  if (isSpon) {
+    if (sponsoredMode === "hide") {
+      tile.classList.remove(SPONSORED_DIM_CLASS);
+      removeSponsoredWatermark(tile);
+      tile.style.display = "none";
+      return;
+    } else if (sponsoredMode === "dim") {
+      tile.classList.add(SPONSORED_DIM_CLASS);
+      addSponsoredWatermark(tile);
+      tile.style.display = "";
+    } else {
+      tile.classList.remove(SPONSORED_DIM_CLASS);
+      removeSponsoredWatermark(tile);
+      tile.style.display = "";
+    }
+  } else {
+    tile.classList.remove(SPONSORED_DIM_CLASS);
+    removeSponsoredWatermark(tile);
+    tile.style.display = "";
+  }
+
+  // S&S logic
   const isSS = containsSubscribeSave(tile);
   if (isSS) {
     if (!tile.classList.contains(HIGHLIGHT_CLASS)) {
       tile.classList.add(HIGHLIGHT_CLASS);
     }
+    tile.classList.remove(NONSS_DIM_CLASS);
     tile.style.setProperty('border', `2px solid ${color}`, 'important');
     tile.style.setProperty('box-shadow', `0 0 10px 2px ${color}55`, 'important');
-    tile.style.display = "";
+    tile.style.pointerEvents = "";
   } else {
     tile.classList.remove(HIGHLIGHT_CLASS);
     tile.style.border = "";
     tile.style.boxShadow = "";
-    tile.style.display = hide ? "none" : "";
+    if (!isSSPresent) {
+      tile.classList.remove(NONSS_DIM_CLASS);
+      tile.style.pointerEvents = "";
+    } else if (nonSSMode === "hide") {
+      tile.classList.remove(NONSS_DIM_CLASS);
+      tile.style.display = "none";
+      tile.style.pointerEvents = "";
+    } else if (nonSSMode === "dim") {
+      tile.classList.add(NONSS_DIM_CLASS);
+      tile.style.display = "";
+      tile.style.pointerEvents = "";
+    } else {
+      tile.classList.remove(NONSS_DIM_CLASS);
+      tile.style.display = "";
+      tile.style.pointerEvents = "";
+    }
   }
 }
 
 // Scan and process all products
 function scanAndProcess(settings) {
   const tiles = document.querySelectorAll('[data-asin][data-component-type="s-search-result"]');
-  tiles.forEach(tile => processTile(tile, settings.color, settings.hide));
+  let ssCount = 0;
+  tiles.forEach(tile => {
+    if (containsSubscribeSave(tile)) ssCount++;
+  });
+  updateCountBanner(ssCount);
+  const isSSPresent = ssCount > 0;
+  tiles.forEach(tile => processTile(tile, settings.color, settings.nonSSMode, isSSPresent, settings.sponsoredMode));
 }
 
 // Observe for dynamically loaded products (infinite scroll)
@@ -48,9 +144,9 @@ const observer = new MutationObserver(() => {
   getSettings(scanAndProcess);
 });
 
-// Listen for popup toggle changes
+// Listen for popup mode changes
 chrome.runtime.onMessage.addListener((msg) => {
-  if (msg.type === "toggleHideNonSS") {
+  if (msg.type === "setNonSSMode" || msg.type === "setSponsoredMode") {
     getSettings(scanAndProcess);
   }
 });

@@ -10,7 +10,7 @@
       padding: 0;
       background: #f6f8fa;
       min-width: 260px;
-      min-height: 210px;
+      min-height: 340px;
       color: #222;
     }
     .header {
@@ -115,6 +115,34 @@
     input:checked + .slider:before {
       transform: translateX(18px);
     }
+    .mode-select {
+      margin-top: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    select {
+      padding: 4px 8px;
+      border-radius: 4px;
+      border: 1px solid #bbb;
+      font-size: 14px;
+      background: #fff;
+    }
+    .note {
+      margin-top: 16px;
+      font-size: 12px;
+      color: #b85c00;
+      background: #fffbe6;
+      border-left: 4px solid #ffd600;
+      padding: 7px 10px;
+      border-radius: 6px;
+    }
+    .sponsored-row {
+      margin-top: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
   </style>
 </head>
 <body>
@@ -135,16 +163,29 @@
       </div>
       <span id="colorValue">#32cd32</span>
     </div>
-    <div class="toggle-row">
-      <label for="hideNonSS">Hide non S&S products:</label>
-      <label class="toggle-switch">
-        <input type="checkbox" id="hideNonSS">
-        <span class="slider"></span>
-      </label>
+    <div class="mode-select">
+      <label for="nonSSMode">Non S&S products:</label>
+      <select id="nonSSMode">
+        <option value="hide">Hide</option>
+        <option value="dim" selected>Dim (grey overlay)</option>
+        <option value="show">Show normally</option>
+      </select>
+    </div>
+    <div class="mode-select">
+      <label for="sponsoredMode">Sponsored items:</label>
+      <select id="sponsoredMode">
+        <option value="hide">Hide</option>
+        <option value="dim" selected>Dim & watermark</option>
+        <option value="show">Show normally</option>
+      </select>
     </div>
     <div class="info">
       Products eligible for <b>Subscribe & Save</b> or <b>auto-delivery</b> are highlighted on Amazon India search results.<br>
-      You can change the highlight color or hide non-eligible products here. Changes apply instantly.
+      You can change the highlight color, how non-eligible or sponsored products appear. Changes apply instantly.
+    </div>
+    <div class="note">
+      If no Subscribe & Save products are found on the page, all products are shown normally and a message is displayed near the results bar.<br>
+      Sponsored items can be hidden or dimmed with a "Sponsored" watermark.
     </div>
   </div>
   <div class="footer">
